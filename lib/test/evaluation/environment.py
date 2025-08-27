@@ -13,6 +13,7 @@ class EnvSettings:
         self.otb_path = ''
         self.nfs_path = ''
         self.uav_path = ''
+        self.hot_path = ''
         self.tpl_path = ''
         self.vot_path = ''
         self.got10k_path = ''
@@ -69,6 +70,7 @@ class EnvSettings_ITP:
         self.got10k_path = os.path.join(data_dir, 'got10k')
         self.got10k_lmdb_path = os.path.join(data_dir, 'got10k_lmdb')
         self.lasot_path = os.path.join(data_dir, 'lasot')
+        self.hot_path = os.path.join(data_dir, 'hot')
         self.lasot_lmdb_path = os.path.join(data_dir, 'lasot_lmdb')
         self.lasot_extension_subset_path = os.path.join(data_dir, 'lasot_extension_subset')
         self.trackingnet_path = os.path.join(data_dir, 'trackingnet')

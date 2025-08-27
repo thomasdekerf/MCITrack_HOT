@@ -145,6 +145,11 @@ python tracking/test.py mcitrack mcitrack_b224 --dataset nfs --threads 2
 python tracking/analysis_results.py # need to modify tracker configs and names
 ```
 
+- Hyperspectral Object Tracking
+```
+python tracking/evaluate_hot.py mcitrack mcitrack_b224
+```
+
 ## Test FLOPs, Params and Speed
 ```
 python tracking/profile_model.py --script mcitrack --config mcitrack_b224
