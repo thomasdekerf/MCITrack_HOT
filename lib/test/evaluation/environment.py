@@ -13,7 +13,7 @@ class EnvSettings:
         self.otb_path = ''
         self.nfs_path = ''
         self.uav_path = ''
-        self.hot_path = ''
+        self.hot_path = r'C:\Users\AI2\Downloads\train\HSI-VIS-FalseColor_25-20250827T134445Z-1-001\HSI-VIS-FalseColor_25\car\car'
         self.tpl_path = ''
         self.vot_path = ''
         self.got10k_path = ''

@@ -2,7 +2,7 @@ import os
 import numpy as np
 from lib.test.evaluation.data import Sequence, BaseDataset, SequenceList
 from lib.test.utils.load_text import load_text
-
+import re
 class HOTDataset(BaseDataset):
     """Dataset for generic hyperspectral object tracking sequences.
 
@@ -29,12 +29,31 @@ class HOTDataset(BaseDataset):
         seq_path = os.path.join(self.base_path, sequence_name)
         frame_files = [f for f in os.listdir(seq_path)
                        if f.lower().endswith((".jpg", ".jpeg", ".png", ".bmp"))]
-        frame_files.sort(key=lambda x: int(os.path.splitext(x)[0]))
+
+        # --- robust sort: use trailing number like ...0001, ...0002, etc.
+        def frame_key(fname: str):
+            base = os.path.splitext(fname)[0]
+            m = re.search(r'(\d+)$', base)  # last number at end of name
+            # sort primarily by the numeric suffix (if any), then by full basename to stabilize order
+            return (int(m.group(1)) if m else float('inf'), base)
+
+        frame_files = sorted(frame_files, key=frame_key)
         frames = [os.path.join(seq_path, f) for f in frame_files]
 
-        anno_path = os.path.join(seq_path, 'groundtruth_rect.txt')
+        # anno_path = os.path.join(seq_path, 'groundtruth_rect.txt')
+        anno_path = os.path.join(seq_path, 'init_rect.txt')
         ground_truth_rect = load_text(str(anno_path), delimiter=(',', None), dtype=np.float64, backend='numpy')
         ground_truth_rect = ground_truth_rect.reshape(-1, 4)
+
+        # --- optional safety: match #frames with #annotations
+        n = min(len(frames), len(ground_truth_rect))
+        if n == 0:
+            raise RuntimeError(f"No frames/annotations found in {seq_path}")
+        if len(frames) != len(ground_truth_rect):
+            print(
+                f"[HOTDataset] Warning: {sequence_name} has {len(frames)} frames but {len(ground_truth_rect)} annos. Truncating to {n}.")
+            frames = frames[:n]
+            ground_truth_rect = ground_truth_rect[:n]
 
         return Sequence(sequence_name, frames, 'hot', ground_truth_rect)
 
