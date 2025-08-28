@@ -150,6 +150,13 @@ python tracking/analysis_results.py # need to modify tracker configs and names
 python tracking/evaluate_hot.py mcitrack mcitrack_b224
 ```
 
+### Automated HOT parameter sweep
+```
+python tracking/run_param_sweep.py
+```
+This script tests multiple inference configurations and logs metrics to `experiments/mcitrack/auto/sweep_log.csv`.
+
+
 ## Test FLOPs, Params and Speed
 ```
 python tracking/profile_model.py --script mcitrack --config mcitrack_b224
