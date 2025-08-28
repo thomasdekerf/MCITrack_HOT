@@ -1,7 +1,13 @@
-import jpeg4py
 import cv2 as cv
 from PIL import Image
 import numpy as np
+
+try:
+    import jpeg4py  # type: ignore
+    _JPEG4PY_AVAILABLE = True
+except ModuleNotFoundError:
+    jpeg4py = None  # type: ignore[assignment]
+    _JPEG4PY_AVAILABLE = False
 
 davis_palette = np.repeat(np.expand_dims(np.arange(0,256), 1), 3, 1).astype(np.uint8)
 davis_palette[:22, :] = [[0, 0, 0], [128, 0, 0], [0, 128, 0], [128, 128, 0],
@@ -13,19 +19,15 @@ davis_palette[:22, :] = [[0, 0, 0], [128, 0, 0], [0, 128, 0], [128, 128, 0],
 
 
 def default_image_loader(path):
-    """The default image loader, reads the image from the given path. It first tries to use the jpeg4py_loader,
-    but reverts to the opencv_loader if the former is not available."""
+    """Read image from path using jpeg4py when available, otherwise OpenCV."""
     if default_image_loader.use_jpeg4py is None:
-        # Try using jpeg4py
-        im = jpeg4py_loader(path)
-        if im is None:
-            default_image_loader.use_jpeg4py = False
-            print('Using opencv_loader instead.')
-        else:
-            default_image_loader.use_jpeg4py = True
-            return im
+        default_image_loader.use_jpeg4py = _JPEG4PY_AVAILABLE
     if default_image_loader.use_jpeg4py:
-        return jpeg4py_loader(path)
+        im = jpeg4py_loader(path)
+        if im is not None:
+            return im
+        default_image_loader.use_jpeg4py = False
+        print('Using opencv_loader instead.')
     return opencv_loader(path)
 
 default_image_loader.use_jpeg4py = None
@@ -33,6 +35,8 @@ default_image_loader.use_jpeg4py = None
 
 def jpeg4py_loader(path):
     """ Image reading using jpeg4py https://github.com/ajkxyz/jpeg4py"""
+    if jpeg4py is None:
+        return None
     try:
         return jpeg4py.JPEG(path).decode()
     except Exception as e:
