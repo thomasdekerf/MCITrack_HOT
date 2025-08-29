@@ -123,32 +123,29 @@ def plot_bars(names, values, ylabel, out_path, title=None, rotation=60):
     plt.close()
 
 
-def main():
-    parser = argparse.ArgumentParser(description='Evaluate tracker on HOT dataset')
-    parser.add_argument('tracker_name', type=str, help='Name of tracking method')
-    parser.add_argument('tracker_param', type=str, help='Name of parameter file')
-    parser.add_argument('--sequence', type=str, default=None, help='Optional single sequence to process')
-    parser.add_argument('--debug', type=int, default=0, help='Debug level')
-    parser.add_argument('--skip_run', action='store_true',
-                        help='Skip running the tracker; reuse existing predictions')
-    parser.add_argument('--skip_vid', action='store_true', help = 'skips video generation')
-    parser.add_argument('--fps', type=int, default=30, help='FPS for output videos')
-    parser.add_argument('--threads', type=int, default=0, help='run_dataset threads (0 = main thread)')
-    parser.add_argument('--num_gpus', type=int, default=1, help='Number of GPUs for run_dataset')
-    args = parser.parse_args()
+def evaluate(tracker_name: str,
+             tracker_param: str,
+             sequence: str | None = None,
+             debug: int = 0,
+             skip_run: bool = False,
+             skip_vid: bool = False,
+             fps: int = 30,
+             threads: int = 0,
+             num_gpus: int = 1):
+    """Run evaluation and return overall dp20 and AUC metrics."""
 
     # Dataset selection
     dataset = get_dataset('hot')
-    if args.sequence is not None:
-        dataset = [seq for seq in dataset if seq.name == args.sequence]
+    if sequence is not None:
+        dataset = [seq for seq in dataset if seq.name == sequence]
         if not dataset:
-            raise ValueError(f"Sequence '{args.sequence}' not found in HOT dataset.")
+            raise ValueError(f"Sequence '{sequence}' not found in HOT dataset.")
 
-    tracker = Tracker(args.tracker_name, args.tracker_param, 'hot')
+    tracker = Tracker(tracker_name, tracker_param, 'hot')
 
     # 1) Optionally run the tracker to produce .txt predictions
-    if not args.skip_run:
-        run_dataset(dataset, [tracker], args.debug, threads=args.threads, num_gpus=args.num_gpus)
+    if not skip_run:
+        run_dataset(dataset, [tracker], debug, threads=threads, num_gpus=num_gpus)
 
     # 2) Post-processing: CSV + Video
     settings = env_settings()  # not strictly needed, but keeps compatibility
@@ -177,8 +174,8 @@ def main():
 
         # Build video from CSV predictions
         gt = np.array(seq.ground_truth_rect, dtype=int)
-        if not args.skip_vid:
-            make_video_from_csv(csv_path, seq.frames, gt, mp4_path, fps=args.fps)
+        if not skip_vid:
+            make_video_from_csv(csv_path, seq.frames, gt, mp4_path, fps=fps)
 
     # 3) Metrics (per-sequence + overall)
     eval_data = extract_results([tracker], dataset, 'hot_eval')
@@ -219,6 +216,32 @@ def main():
           f"- Plots: {plots_dir}\n"
           f"- Metrics JSON: {metrics_path}\n"
           f"- CSV/MP4 live next to each sequence under: {results_root}\n")
+
+    return dp20_avg, auc_avg
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Evaluate tracker on HOT dataset')
+    parser.add_argument('tracker_name', type=str, help='Name of tracking method')
+    parser.add_argument('tracker_param', type=str, help='Name of parameter file')
+    parser.add_argument('--sequence', type=str, default=None, help='Optional single sequence to process')
+    parser.add_argument('--debug', type=int, default=0, help='Debug level')
+    parser.add_argument('--skip_run', action='store_true',
+                        help='Skip running the tracker; reuse existing predictions')
+    parser.add_argument('--skip_vid', action='store_true', help='skips video generation')
+    parser.add_argument('--fps', type=int, default=30, help='FPS for output videos')
+    parser.add_argument('--threads', type=int, default=0, help='run_dataset threads (0 = main thread)')
+    parser.add_argument('--num_gpus', type=int, default=1, help='Number of GPUs for run_dataset')
+    args = parser.parse_args()
+
+    evaluate(args.tracker_name, args.tracker_param,
+             sequence=args.sequence,
+             debug=args.debug,
+             skip_run=args.skip_run,
+             skip_vid=args.skip_vid,
+             fps=args.fps,
+             threads=args.threads,
+             num_gpus=args.num_gpus)
 
 
 if __name__ == '__main__':

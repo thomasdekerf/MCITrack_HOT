@@ -147,14 +147,15 @@ python tracking/analysis_results.py # need to modify tracker configs and names
 
 - Hyperspectral Object Tracking
 ```
+# evaluate the base model on HOT
 python tracking/evaluate_hot.py mcitrack mcitrack_b224
 ```
 
 ### Automated HOT parameter sweep
 ```
-python tracking/run_param_sweep.py
+python tracking/hparam_sweep.py
 ```
-This script tests multiple inference configurations and logs metrics to `experiments/mcitrack/auto/sweep_log.csv`.
+This script iterates over the configs in `experiments/mcitrack/auto`, evaluates each one and appends metrics to `experiments/mcitrack/auto/sweep_log.csv`.
 
 
 ## Test FLOPs, Params and Speed
