@@ -32,6 +32,25 @@ def run():
                 'precision@20', 'AUC'
             ])
 
+    results = []
+    completed = set()
+    if LOG_PATH.exists():
+        with open(LOG_PATH, 'r', newline='') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                cfg_name = row['config']
+                completed.add(cfg_name)
+                results.append((
+                    cfg_name,
+                    int(row['search_size']),
+                    float(row['search_factor']),
+                    int(row['template_size']),
+                    float(row['template_factor']),
+                    row['window'].lower() in ('true', '1'),
+                    float(row['precision@20']),
+                    float(row['AUC']),
+                ))
+
     combos = list(itertools.product(
         SEARCH_SIZES, SEARCH_FACTORS, TEMPLATE_SIZES,
         TEMPLATE_FACTORS, WINDOW_OPTIONS
@@ -39,6 +58,9 @@ def run():
 
     for ss, sf, ts, tf, win in tqdm(combos, desc='Experiments'):
         cfg_name = f'ss{ss}_sf{sf}_ts{ts}_tf{tf}_w{int(win)}'
+        if cfg_name in completed:
+            continue
+
         yaml_path = CONFIG_ROOT / f'{cfg_name}.yaml'
 
         with open(BASE_CONFIG, 'r') as f:
@@ -84,11 +106,21 @@ def run():
             dp20 = float('nan')
             auc = float('nan')
 
+        results.append((cfg_name, ss, sf, ts, tf, win, dp20, auc))
+
         with open(LOG_PATH, 'a', newline='') as f:
             writer = csv.writer(f)
             writer.writerow([
                 datetime.now().isoformat(), cfg_name, ss, sf, ts, tf, win, dp20, auc
             ])
+
+    results.sort(key=lambda r: (r[-2], r[-1]), reverse=True)
+    print('\nSummary (sorted by precision@20 then AUC):')
+    header = f"{'config':35} | ss | sf  | ts | tf  | w | dp20  | AUC"
+    print(header)
+    print('-' * len(header))
+    for cfg_name, ss, sf, ts, tf, win, dp20, auc in results:
+        print(f"{cfg_name:35} | {ss:3d} | {sf:3.1f} | {ts:3d} | {tf:3.1f} | {int(win):1d} | {dp20:5.3f} | {auc:5.3f}")
 
 
 if __name__ == '__main__':

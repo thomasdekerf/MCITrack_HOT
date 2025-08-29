@@ -103,10 +103,32 @@ def run_sweep(skip_run: bool = False, skip_vid: bool = True):
         )
     )
 
-    results = []
+    results: list[tuple] = []
+    completed = set()
+    if LOG_PATH.exists():
+        with open(LOG_PATH, "r", newline="") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                cfg_name = row["config"]
+                completed.add(cfg_name)
+                results.append(
+                    (
+                        cfg_name,
+                        int(row["search_size"]),
+                        float(row["search_factor"]),
+                        int(row["template_size"]),
+                        float(row["template_factor"]),
+                        row["window"].lower() in ("true", "1"),
+                        float(row["precision@20"]),
+                        float(row["AUC"]),
+                    )
+                )
 
     for ss, sf, ts, tf, win in tqdm(combos, desc="Experiments"):
         cfg_name = f"ss{ss}_sf{sf}_ts{ts}_tf{tf}_w{int(win)}"
+        if cfg_name in completed:
+            continue
+
         exp_dir = CONFIG_ROOT / cfg_name
 
         write_config(
