@@ -5,6 +5,7 @@ import cv2
 from lib.utils.box_ops import box_xywh_to_xyxy, box_xyxy_to_cxcywh
 from lib.test.utils.hann import hann2d
 from lib.models.mcitrack import build_mcitrack
+from lib.models.mcitrack.fastitpn import load_pretrained
 from lib.test.tracker.utils import Preprocessor
 from lib.utils.box_ops import clip_box
 import numpy as np
@@ -15,7 +16,8 @@ class MCITRACK(BaseTracker):
     def __init__(self, params, dataset_name):
         super(MCITRACK, self).__init__(params)
         network = build_mcitrack(params.cfg)
-        network.load_state_dict(torch.load(self.params.checkpoint, map_location='cpu')['net'], strict=True)
+        checkpoint = torch.load(self.params.checkpoint, map_location="cpu")['net']
+        load_pretrained(network, checkpoint, params.cfg.MODEL.ENCODER.POS_TYPE)
         self.cfg = params.cfg
         self.network = network.cuda()
         self.network.eval()

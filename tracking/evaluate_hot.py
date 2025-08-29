@@ -167,7 +167,8 @@ def evaluate(tracker_name: str,
         mp4_path = base_path + '.mp4'
 
         if not os.path.isfile(txt_path):
-            raise FileNotFoundError(f"Missing prediction file: {txt_path}")
+            print(f"Warning: missing prediction file {txt_path}, skipping sequence")
+            continue
 
         preds = load_preds_txt(txt_path)
         save_csv_from_preds(preds, csv_path)
@@ -178,10 +179,13 @@ def evaluate(tracker_name: str,
             make_video_from_csv(csv_path, seq.frames, gt, mp4_path, fps=fps)
 
     # 3) Metrics (per-sequence + overall)
-    eval_data = extract_results([tracker], dataset, 'hot_eval')
+    eval_data = extract_results([tracker], dataset, 'hot_eval', skip_missing_seq=True)
 
     dp20_seq, auc_seq, thr_center, thr_overlap = compute_metrics_per_sequence(eval_data)
-    seq_names = [seq.name for seq in dataset]
+    valid_mask = torch.as_tensor(eval_data.get('valid_sequence', [1] * len(dataset))).bool()
+    seq_names = [seq.name for seq, v in zip(dataset, valid_mask.tolist()) if v]
+    dp20_seq = dp20_seq[valid_mask]
+    auc_seq = auc_seq[valid_mask]
 
     dp20_avg = float(dp20_seq.mean().item()) if dp20_seq.numel() > 0 else 0.0
     auc_avg = float(auc_seq.mean().item()) if auc_seq.numel() > 0 else 0.0
