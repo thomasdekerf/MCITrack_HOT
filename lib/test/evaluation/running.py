@@ -6,6 +6,7 @@ from itertools import product
 from collections import OrderedDict
 from lib.test.evaluation import Sequence, Tracker
 import torch
+import traceback
 
 
 def _save_tracker_output(seq: Sequence, tracker: Tracker, output: dict):
@@ -135,8 +136,9 @@ def run_sequence(seq: Sequence, tracker: Tracker, debug=False, num_gpu=8):
         try:
             output = tracker.run_sequence(seq, debug=debug)
         except Exception as e:
-            print(e)
-            return
+            print(f"Error while running {tracker.name} on {seq.name}: {e}")
+            traceback.print_exc()
+            raise
 
     sys.stdout.flush()
 

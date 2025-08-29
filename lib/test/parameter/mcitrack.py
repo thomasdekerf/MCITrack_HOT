@@ -25,7 +25,6 @@ def parameters(yaml_name: str):
         yaml_file = os.path.join(prj_dir, 'experiments/mcitrack', yaml_name, 'config.yaml')
     update_config_from_file(yaml_file)
     params.cfg = cfg
-    print("test config: ", cfg)
 
     params.yaml_name = yaml_name
     # template and search region
