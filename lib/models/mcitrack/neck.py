@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from functools import partial
-from timm.models.layers import DropPath
+from timm.layers import DropPath
 import torch.utils.checkpoint as checkpoint
 class DWConv(nn.Module):
     def __init__(self, dim=768):
