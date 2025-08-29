@@ -44,11 +44,25 @@ def run():
         with open(BASE_CONFIG, 'r') as f:
             cfg = yaml.safe_load(f)
 
+        # Apply parameter overrides for evaluation
         cfg['TEST']['SEARCH_SIZE'] = ss
         cfg['TEST']['SEARCH_FACTOR'] = sf
         cfg['TEST']['TEMPLATE_SIZE'] = ts
         cfg['TEST']['TEMPLATE_FACTOR'] = tf
         cfg['TEST']['WINDOW'] = bool(win)
+
+        # Mirror TEST overrides under DATA so that the model is built with the
+        # same spatial dimensions used during evaluation.  Without this, the
+        # encoder retains the default sizes from the base configuration, which
+        # can cause tensor shape mismatches when the tracker processes images
+        # of different dimensions.
+        cfg.setdefault('DATA', {})
+        cfg['DATA'].setdefault('SEARCH', {})
+        cfg['DATA'].setdefault('TEMPLATE', {})
+        cfg['DATA']['SEARCH']['SIZE'] = ss
+        cfg['DATA']['SEARCH']['FACTOR'] = sf
+        cfg['DATA']['TEMPLATE']['SIZE'] = ts
+        cfg['DATA']['TEMPLATE']['FACTOR'] = tf
 
         with open(yaml_path, 'w') as f:
             yaml.safe_dump(cfg, f)

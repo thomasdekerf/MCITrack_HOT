@@ -64,7 +64,30 @@ def write_config(exp_dir: Path, overrides: dict):
     with open(BASE_CONFIG, "r") as f:
         cfg = yaml.safe_load(f)
 
+    # Apply the overrides to TEST section
     cfg["TEST"].update(overrides)
+
+    # Keep DATA settings in sync with TEST settings.  The model encoder is
+    # constructed using the sizes specified under ``DATA``.  When we vary the
+    # search/template sizes during a sweep, failing to update these fields means
+    # the model is built with the default dimensions (e.g. template size 112),
+    # while the tracker operates on the overridden sizes (e.g. 128).  This
+    # mismatch leads to tensor shape errors during inference.  We therefore
+    # mirror the relevant TEST overrides under DATA so that the network and
+    # tracker agree on the spatial dimensions.
+
+    data_cfg = cfg.setdefault("DATA", {})
+    search_cfg = data_cfg.setdefault("SEARCH", {})
+    template_cfg = data_cfg.setdefault("TEMPLATE", {})
+
+    if "SEARCH_SIZE" in overrides:
+        search_cfg["SIZE"] = overrides["SEARCH_SIZE"]
+    if "SEARCH_FACTOR" in overrides:
+        search_cfg["FACTOR"] = overrides["SEARCH_FACTOR"]
+    if "TEMPLATE_SIZE" in overrides:
+        template_cfg["SIZE"] = overrides["TEMPLATE_SIZE"]
+    if "TEMPLATE_FACTOR" in overrides:
+        template_cfg["FACTOR"] = overrides["TEMPLATE_FACTOR"]
 
     exp_dir.mkdir(parents=True, exist_ok=True)
     with open(exp_dir / "config.yaml", "w") as f:
