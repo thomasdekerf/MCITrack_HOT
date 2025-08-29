@@ -18,6 +18,7 @@ from pathlib import Path
 
 import yaml
 from tqdm import tqdm
+import torch
 
 try:  # allow both package and script execution
     from . import evaluate_hot  # type: ignore
@@ -74,6 +75,10 @@ def write_config(exp_dir: Path, overrides: dict):
 def run_sweep(skip_run: bool = False, skip_vid: bool = True):
     ensure_log()
 
+    num_gpus = torch.cuda.device_count()
+    if num_gpus == 0:
+        raise RuntimeError("No CUDA devices available for the hyper-parameter sweep.")
+
     combos = list(
         itertools.product(
             SEARCH_SIZES, SEARCH_FACTORS, TEMPLATE_SIZES, TEMPLATE_FACTORS, WINDOW_OPTIONS
@@ -105,6 +110,7 @@ def run_sweep(skip_run: bool = False, skip_vid: bool = True):
             param_name,
             skip_run=skip_run,
             skip_vid=skip_vid,
+            num_gpus=num_gpus,
         )
 
         results.append((cfg_name, ss, sf, ts, tf, win, dp20, auc))
