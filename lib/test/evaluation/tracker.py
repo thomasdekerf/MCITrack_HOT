@@ -9,6 +9,7 @@ import sys
 from lib.utils.lmdb_utils import decode_img
 from pathlib import Path
 import numpy as np
+from tqdm import tqdm
 
 
 def trackerlist(name: str, parameter_name: str, dataset_name: str, run_ids = None, display_name: str = None,
@@ -132,7 +133,8 @@ class Tracker:
 
         _store_outputs(out, init_default)
 
-        for frame_num, frame_path in enumerate(seq.frames[1:], start=1):
+        for frame_num, frame_path in enumerate(
+                tqdm(seq.frames[1:], desc=f"{seq.name}", unit="frame"), start=1):
             image = self._read_image(frame_path)
 
             start_time = time.time()
