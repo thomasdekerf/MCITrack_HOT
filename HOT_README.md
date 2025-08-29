@@ -30,3 +30,17 @@ Outputs for each sequence are saved under `tracking_results/mcitrack/hot/` and i
 - `sequence.mp4` – video with predicted (red) and ground-truth (green) boxes.
 - `sequence.csv` – predicted bounding boxes.
 - `metrics.json` – dataset precision@20 and success AUC values.
+
+## Inference on unlabeled sequences
+
+For running the tracker on a folder that only provides the first bounding box,
+use `tracking/infer_folder.py`. The folder should contain the frame images and
+an `init_rect.txt` file with the initial `x y w h` box:
+
+```bash
+python tracking/infer_folder.py mcitrack mcitrack_b224 --seq_dir /path/to/vis-worker \
+    --output_csv vis-worker.csv
+```
+
+The script initializes the tracker from `init_rect.txt` and writes all predicted
+boxes to the specified CSV file in the format `id,x,y,w,h`.
