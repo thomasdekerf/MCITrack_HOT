@@ -1040,7 +1040,15 @@ def load_pretrained(model, checkpoint, pos_type):
         state_dict = checkpoint["model"]
     else:
         state_dict = checkpoint
-    pe = state_dict['pos_embed'].float()
+
+    # ``pos_embed`` may be stored under different prefixes depending on how
+    # the checkpoint was saved (e.g. ``encoder.body.pos_embed``).  Search for
+    # the tensor rather than assuming a fixed key.
+    pos_key = next((k for k in state_dict.keys() if "pos_embed" in k), None)
+    if pos_key is None:
+        raise KeyError("pos_embed")
+
+    pe = state_dict[pos_key].float()
     b_pe, hw_pe, c_pe = pe.shape
     side_pe = int(math.sqrt(hw_pe))
     side_num_patches_search = int(math.sqrt(model.num_patches_search))
@@ -1071,7 +1079,7 @@ def load_pretrained(model, checkpoint, pos_type):
     else:
         pe_t = pe
     pe_xz = torch.cat((pe_s, pe_t), dim=1)
-    state_dict['pos_embed'] = pe_xz
+    state_dict[pos_key] = pe_xz
     auxiliary_keys = ["template_background_token", "template_foreground_token", "search_token"]
     for key in auxiliary_keys:
         if (key in model.state_dict().keys()) and (key not in state_dict.keys()):

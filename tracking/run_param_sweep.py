@@ -19,6 +19,7 @@ SEARCH_FACTORS = [4.0, 3.0, 2.0]
 TEMPLATE_SIZES = [112, 128]
 TEMPLATE_FACTORS = [2.0, 1.5]
 WINDOW_OPTIONS = [True, False]
+NUM_TEMPLATES = [1, 5]
 
 
 def run():
@@ -29,7 +30,7 @@ def run():
             writer.writerow([
                 'timestamp', 'config', 'search_size', 'search_factor',
                 'template_size', 'template_factor', 'window',
-                'precision@20', 'AUC'
+                'num_templates', 'precision@20', 'AUC'
             ])
 
     results = []
@@ -47,17 +48,18 @@ def run():
                     int(row['template_size']),
                     float(row['template_factor']),
                     row['window'].lower() in ('true', '1'),
+                    int(row.get('num_templates', 1)),
                     float(row['precision@20']),
                     float(row['AUC']),
                 ))
 
     combos = list(itertools.product(
         SEARCH_SIZES, SEARCH_FACTORS, TEMPLATE_SIZES,
-        TEMPLATE_FACTORS, WINDOW_OPTIONS
+        TEMPLATE_FACTORS, WINDOW_OPTIONS, NUM_TEMPLATES
     ))
 
-    for ss, sf, ts, tf, win in tqdm(combos, desc='Experiments'):
-        cfg_name = f'ss{ss}_sf{sf}_ts{ts}_tf{tf}_w{int(win)}'
+    for ss, sf, ts, tf, win, nt in tqdm(combos, desc='Experiments'):
+        cfg_name = f'ss{ss}_sf{sf}_ts{ts}_tf{tf}_w{int(win)}_nt{nt}'
         if cfg_name in completed:
             continue
 
@@ -72,6 +74,7 @@ def run():
         cfg['TEST']['TEMPLATE_SIZE'] = ts
         cfg['TEST']['TEMPLATE_FACTOR'] = tf
         cfg['TEST']['WINDOW'] = bool(win)
+        cfg['TEST']['NUM_TEMPLATES'] = nt
 
         # Mirror TEST overrides under DATA so that the model is built with the
         # same spatial dimensions used during evaluation.  Without this, the
@@ -85,6 +88,7 @@ def run():
         cfg['DATA']['SEARCH']['FACTOR'] = sf
         cfg['DATA']['TEMPLATE']['SIZE'] = ts
         cfg['DATA']['TEMPLATE']['FACTOR'] = tf
+        cfg['DATA']['TEMPLATE']['NUMBER'] = nt
 
         with open(yaml_path, 'w') as f:
             yaml.safe_dump(cfg, f)
@@ -106,21 +110,21 @@ def run():
             dp20 = float('nan')
             auc = float('nan')
 
-        results.append((cfg_name, ss, sf, ts, tf, win, dp20, auc))
+        results.append((cfg_name, ss, sf, ts, tf, win, nt, dp20, auc))
 
         with open(LOG_PATH, 'a', newline='') as f:
             writer = csv.writer(f)
             writer.writerow([
-                datetime.now().isoformat(), cfg_name, ss, sf, ts, tf, win, dp20, auc
+                datetime.now().isoformat(), cfg_name, ss, sf, ts, tf, win, nt, dp20, auc
             ])
 
     results.sort(key=lambda r: (r[-2], r[-1]), reverse=True)
     print('\nSummary (sorted by precision@20 then AUC):')
-    header = f"{'config':35} | ss | sf  | ts | tf  | w | dp20  | AUC"
+    header = f"{'config':35} | ss | sf  | ts | tf  | w | nt | dp20  | AUC"
     print(header)
     print('-' * len(header))
-    for cfg_name, ss, sf, ts, tf, win, dp20, auc in results:
-        print(f"{cfg_name:35} | {ss:3d} | {sf:3.1f} | {ts:3d} | {tf:3.1f} | {int(win):1d} | {dp20:5.3f} | {auc:5.3f}")
+    for cfg_name, ss, sf, ts, tf, win, nt, dp20, auc in results:
+        print(f"{cfg_name:35} | {ss:3d} | {sf:3.1f} | {ts:3d} | {tf:3.1f} | {int(win):1d} | {nt:2d} | {dp20:5.3f} | {auc:5.3f}")
 
 
 if __name__ == '__main__':

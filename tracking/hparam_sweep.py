@@ -36,6 +36,7 @@ SEARCH_FACTORS = [4.0, 3.0, 2.0]
 TEMPLATE_SIZES = [112, 128]
 TEMPLATE_FACTORS = [2.0, 1.5]
 WINDOW_OPTIONS = [True, False]
+NUM_TEMPLATES = [1, 5]
 
 
 def ensure_log():
@@ -53,6 +54,7 @@ def ensure_log():
                     "template_size",
                     "template_factor",
                     "window",
+                    "num_templates",
                     "precision@20",
                     "AUC",
                 ]
@@ -88,6 +90,8 @@ def write_config(exp_dir: Path, overrides: dict):
         template_cfg["SIZE"] = overrides["TEMPLATE_SIZE"]
     if "TEMPLATE_FACTOR" in overrides:
         template_cfg["FACTOR"] = overrides["TEMPLATE_FACTOR"]
+    if "NUM_TEMPLATES" in overrides:
+        template_cfg["NUMBER"] = overrides["NUM_TEMPLATES"]
 
     exp_dir.mkdir(parents=True, exist_ok=True)
     with open(exp_dir / "config.yaml", "w") as f:
@@ -99,7 +103,12 @@ def run_sweep(skip_run: bool = False, skip_vid: bool = True):
 
     combos = list(
         itertools.product(
-            SEARCH_SIZES, SEARCH_FACTORS, TEMPLATE_SIZES, TEMPLATE_FACTORS, WINDOW_OPTIONS
+            SEARCH_SIZES,
+            SEARCH_FACTORS,
+            TEMPLATE_SIZES,
+            TEMPLATE_FACTORS,
+            WINDOW_OPTIONS,
+            NUM_TEMPLATES,
         )
     )
 
@@ -119,13 +128,14 @@ def run_sweep(skip_run: bool = False, skip_vid: bool = True):
                         int(row["template_size"]),
                         float(row["template_factor"]),
                         row["window"].lower() in ("true", "1"),
+                        int(row.get("num_templates", 1)),
                         float(row["precision@20"]),
                         float(row["AUC"]),
                     )
                 )
 
-    for ss, sf, ts, tf, win in tqdm(combos, desc="Experiments"):
-        cfg_name = f"ss{ss}_sf{sf}_ts{ts}_tf{tf}_w{int(win)}"
+    for ss, sf, ts, tf, win, nt in tqdm(combos, desc="Experiments"):
+        cfg_name = f"ss{ss}_sf{sf}_ts{ts}_tf{tf}_w{int(win)}_nt{nt}"
         if cfg_name in completed:
             continue
 
@@ -139,6 +149,7 @@ def run_sweep(skip_run: bool = False, skip_vid: bool = True):
                 "TEMPLATE_SIZE": ts,
                 "TEMPLATE_FACTOR": tf,
                 "WINDOW": bool(win),
+                "NUM_TEMPLATES": nt,
             },
         )
 
@@ -152,7 +163,7 @@ def run_sweep(skip_run: bool = False, skip_vid: bool = True):
             skip_vid=skip_vid,
         )
 
-        results.append((cfg_name, ss, sf, ts, tf, win, dp20, auc))
+        results.append((cfg_name, ss, sf, ts, tf, win, nt, dp20, auc))
 
         with open(LOG_PATH, "a", newline="") as f:
             writer = csv.writer(f)
@@ -165,6 +176,7 @@ def run_sweep(skip_run: bool = False, skip_vid: bool = True):
                     ts,
                     tf,
                     win,
+                    nt,
                     dp20,
                     auc,
                 ]
@@ -174,13 +186,13 @@ def run_sweep(skip_run: bool = False, skip_vid: bool = True):
     results.sort(key=lambda r: (r[-2], r[-1]), reverse=True)
     print("\nSummary (sorted by precision@20 then AUC):")
     header = (
-        f"{'config':35} | ss | sf  | ts | tf  | w | dp20  | AUC"
+        f"{'config':35} | ss | sf  | ts | tf  | w | nt | dp20  | AUC"
     )
     print(header)
     print("-" * len(header))
-    for cfg_name, ss, sf, ts, tf, win, dp20, auc in results:
+    for cfg_name, ss, sf, ts, tf, win, nt, dp20, auc in results:
         print(
-            f"{cfg_name:35} | {ss:3d} | {sf:3.1f} | {ts:3d} | {tf:3.1f} | {int(win):1d} | {dp20:5.3f} | {auc:5.3f}"
+            f"{cfg_name:35} | {ss:3d} | {sf:3.1f} | {ts:3d} | {tf:3.1f} | {int(win):1d} | {nt:2d} | {dp20:5.3f} | {auc:5.3f}"
         )
 
 
