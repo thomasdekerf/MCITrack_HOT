@@ -26,10 +26,18 @@ class MCITrack(nn.Module):
         self.decoder_type = decoder_type
         self.neck = neck
 
-        self.num_patch_x = self.encoder.body.num_patches_search
-        self.num_patch_z = self.encoder.body.num_patches_template
-        self.fx_sz = int(math.sqrt(self.num_patch_x))
-        self.fz_sz = int(math.sqrt(self.num_patch_z))
+        # Expose patch counts required for positional embedding interpolation.
+        # ``load_pretrained`` expects the attributes ``num_patches_search`` and
+        # ``num_patches_template`` on the model.  Historically the code used
+        # ``num_patch_x``/``num_patch_z`` internally, so we populate both sets
+        # of names for compatibility.
+        self.num_patches_search = self.encoder.body.num_patches_search
+        self.num_patches_template = self.encoder.body.num_patches_template
+        # Backwards-compatible aliases used throughout the project
+        self.num_patch_x = self.num_patches_search
+        self.num_patch_z = self.num_patches_template
+        self.fx_sz = int(math.sqrt(self.num_patches_search))
+        self.fz_sz = int(math.sqrt(self.num_patches_template))
 
         self.decoder = decoder
 
