@@ -155,7 +155,7 @@ python tracking/evaluate_hot.py mcitrack mcitrack_b224
 ```
 python tracking/hparam_sweep.py
 ```
-This script iterates over the configs in `experiments/mcitrack/auto`, evaluates each one and appends metrics to `experiments/mcitrack/auto/sweep_log.csv`.
+This script iterates over combinations of search/template sizes and factors, the window option, and the number of templates.  Each configuration under `experiments/mcitrack/auto` is evaluated and the metrics are appended to `experiments/mcitrack/auto/sweep_log.csv`.
 
 
 ## Test FLOPs, Params and Speed
