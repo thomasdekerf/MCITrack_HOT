@@ -79,6 +79,7 @@ TEST:
     NFS: 0.8
     UAV: 0.65
     VOT20: 0.35
+    HOT: 0.8
   UPH:
     LASOT: 0.7
     LASOT_EXTENSION_SUBSET: 0.8
@@ -87,6 +88,7 @@ TEST:
     NFS: 0.92
     UAV: 0.85
     VOT20: 0.94
+    HOT: 0.92
   INTER:
     LASOT: 40
     LASOT_EXTENSION_SUBSET: 90
@@ -95,6 +97,7 @@ TEST:
     NFS: 90
     UAV: 25
     VOT20: 10
+    HOT: 25
   MB:
     LASOT: 500
     LASOT_EXTENSION_SUBSET: 500
@@ -103,3 +106,4 @@ TEST:
     NFS: 500
     UAV: 500
     VOT20: 500
+    HOT: 500
