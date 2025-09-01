@@ -389,13 +389,27 @@ class RandomOcclusion(TransformBase):
         tensor[..., y1:y1+occ_h, x1:x1+occ_w] = self.fill
         return tensor
 
-    def transform_image(self, image, params):
+    def transform_image(self, image, *params):
+        """Apply occlusion to an image.
+
+        ``TransformBase`` expands rolled parameters before calling this
+        method.  The previous implementation expected a single ``params``
+        tuple which caused a mismatch and the method received multiple
+        positional arguments instead.  By accepting ``*params`` we gracefully
+        handle any number of parameters.
+        """
+        if not params:
+            return image
         return self._apply(image, params)
 
-    def transform_mask(self, mask, params):
+    def transform_mask(self, mask, *params):
+        if not params:
+            return mask
         return self._apply(mask, params)
 
-    def transform_att(self, att, params):
+    def transform_att(self, att, *params):
+        if not params:
+            return att
         return self._apply(att, params)
 
 
