@@ -56,6 +56,21 @@ def run(settings):
     else:
         raise ValueError("illegal script name")
 
+    # load pretrained weights for fine-tuning if provided
+    pretrained_path = getattr(cfg.TRAIN, "PRETRAINED_PATH", None)
+    if pretrained_path:
+        if not os.path.isfile(pretrained_path):
+            raise FileNotFoundError(f"{pretrained_path} not found")
+        checkpoint = torch.load(pretrained_path, map_location="cpu")
+        state = checkpoint.get("net", checkpoint.get("model", checkpoint))
+        missing, unexpected = net.load_state_dict(state, strict=False)
+        if settings.local_rank in [-1, 0]:
+            print(f"Loaded pretrained weights from {pretrained_path}")
+            if missing:
+                print("Missing keys:", missing)
+            if unexpected:
+                print("Unexpected keys:", unexpected)
+
     # wrap networks to distributed one
     net.cuda()
     if settings.local_rank != -1:

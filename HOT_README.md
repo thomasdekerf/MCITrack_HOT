@@ -30,3 +30,20 @@ Outputs for each sequence are saved under `tracking_results/mcitrack/hot/` and i
 - `sequence.mp4` – video with predicted (red) and ground-truth (green) boxes.
 - `sequence.csv` – predicted bounding boxes.
 - `metrics.json` – dataset precision@20 and success AUC values.
+
+## Training on HOT
+
+For fine-tuning or training solely on HOT, set the dataset path in
+`lib/train/admin/local.py`:
+
+```python
+settings.hot_dir = '/path/to/HOT_ROOT'
+```
+
+Then use the HOT-specific experiment configuration:
+
+```bash
+torchrun --nproc_per_node 1 lib/train/run_training.py --script mcitrack --config mcitrack_b224_hot --save_dir .
+```
+
+This trains MCITrack using only the HOT sequences.

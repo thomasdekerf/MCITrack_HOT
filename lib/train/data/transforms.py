@@ -353,3 +353,98 @@ class RandomHorizontalFlip_Norm(RandomHorizontalFlip):
             coords_flip[1,:] = 1 - coords[1,:]
             return coords_flip
         return coords
+
+
+class RandomOcclusion(TransformBase):
+    """Randomly occlude a rectangular region of the image."""
+
+    def __init__(self, probability=0.3, min_size=0.1, max_size=0.4, fill=0.0):
+        """Args:
+            probability: probability of applying the transform.
+            min_size: minimum size of the occlusion relative to image dims.
+            max_size: maximum size of the occlusion relative to image dims.
+            fill: value used to fill the occluded region.
+        """
+        super().__init__()
+        self.probability = probability
+        self.min_size = min_size
+        self.max_size = max_size
+        self.fill = fill
+
+    def roll(self):
+        if random.random() < self.probability:
+            size = random.uniform(self.min_size, self.max_size)
+            return size, random.random(), random.random()
+        return None
+
+    def _apply(self, tensor, params):
+        if params is None or tensor is None:
+            return tensor
+        size, rx, ry = params
+        h, w = tensor.shape[-2:]
+        occ_h = max(1, int(h * size))
+        occ_w = max(1, int(w * size))
+        x1 = int((w - occ_w) * rx)
+        y1 = int((h - occ_h) * ry)
+        tensor[..., y1:y1+occ_h, x1:x1+occ_w] = self.fill
+        return tensor
+
+    def transform_image(self, image, params):
+        return self._apply(image, params)
+
+    def transform_mask(self, mask, params):
+        return self._apply(mask, params)
+
+    def transform_att(self, att, params):
+        return self._apply(att, params)
+
+
+class RandomBlur(TransformBase):
+    """Apply Gaussian blur to the image with a given probability."""
+
+    def __init__(self, probability=0.1, kernel_size=5):
+        super().__init__()
+        self.probability = probability
+        self.kernel_size = kernel_size
+
+    def roll(self):
+        return random.random() < self.probability
+
+    def transform_image(self, image, do_blur):
+        if not do_blur:
+            return image
+        return tvisf.gaussian_blur(image, [self.kernel_size, self.kernel_size])
+
+
+class RandomDownsample(TransformBase):
+    """Randomly reduce the resolution of the image and then resize back."""
+
+    def __init__(self, probability=0.1, min_scale=0.5, max_scale=1.0):
+        super().__init__()
+        self.probability = probability
+        self.min_scale = min_scale
+        self.max_scale = max_scale
+
+    def roll(self):
+        if random.random() < self.probability:
+            return random.uniform(self.min_scale, self.max_scale)
+        return None
+
+    def _resize(self, tensor, scale, mode):
+        if tensor is None or scale is None or abs(scale - 1.0) < 1e-6:
+            return tensor
+        h, w = tensor.shape[-2:]
+        new_h = max(1, int(h * scale))
+        new_w = max(1, int(w * scale))
+        tensor = F.interpolate(tensor.unsqueeze(0), size=(new_h, new_w), mode=mode, align_corners=False)
+        tensor = F.interpolate(tensor, size=(h, w), mode=mode, align_corners=False)
+        return tensor.squeeze(0)
+
+    def transform_image(self, image, scale):
+        return self._resize(image, scale, "bilinear")
+
+    def transform_mask(self, mask, scale):
+        return self._resize(mask, scale, "nearest")
+
+    def transform_att(self, att, scale):
+        return self._resize(att, scale, "nearest")

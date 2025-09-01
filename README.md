@@ -104,6 +104,35 @@ Download [pre-trained weights](https://drive.google.com/drive/folders/1qDAMcU3Jp
 torchrun --nproc_per_node 8 lib/train/run_training.py --script mcitrack --config mcitrack_b224 --save_dir .
 ```
 
+### Fine-tune or retrain
+
+To adapt the tracker to new annotated data, you can fine-tune from an existing
+checkpoint. Specify the starting weights in your experiment yaml using
+`TRAIN.PRETRAINED_PATH`:
+
+```
+TRAIN:
+  PRETRAINED_PATH: /path/to/checkpoint.pth
+```
+
+The default training configuration now includes stronger data augmentations
+such as random occlusion, blur and resolution drop, along with larger search
+regions and jitters. These changes improve robustness to scale variation,
+occlusions, small objects, fast motion and low-resolution sequences.
+
+### Train only on HOT
+
+To train exclusively on your HOT dataset, first set `hot_dir` in
+`lib/train/admin/local.py` to the dataset root. Then launch training with the
+HOT-specific config:
+
+```
+torchrun --nproc_per_node 1 lib/train/run_training.py --script mcitrack --config mcitrack_b224_hot --save_dir .
+```
+
+This configuration uses only the HOT sequences and a small batch size suitable
+for a single 16 GB GPU.
+
 
 
 ## Test and evaluate on benchmarks
