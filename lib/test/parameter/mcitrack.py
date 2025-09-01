@@ -8,7 +8,7 @@ from lib.config.mcitrack.config import cfg, update_config_from_file
 # experiment does not provide its own weights.  This avoids the
 # need to train a new model for every hyper-parameter setting in the
 # sweep.
-BASE_YAML_NAME = "mcitrack_b224"
+BASE_YAML_NAME = "mcitrack_l384"
 
 
 def parameters(yaml_name: str):

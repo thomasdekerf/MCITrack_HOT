@@ -162,3 +162,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+# python .\tracking\predict_to_csv.py mcitrack mcitrack_l384

@@ -8,7 +8,7 @@ DATA:
     CENTER_JITTER: 3.5
     FACTOR: 4.0
     SCALE_JITTER: 0.5
-    SIZE: 224
+    SIZE: 320
     NUMBER: 2
   STD:
   - 0.229
@@ -19,7 +19,7 @@ DATA:
     FACTOR: 2.0
     SCALE_JITTER: 0
     SIZE: 112
-    NUMBER: 5
+    NUMBER: 10
   TRAIN:
     DATASETS_NAME:
     - LASOT

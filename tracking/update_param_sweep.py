@@ -28,7 +28,7 @@ except ImportError:  # pragma: no cover - fallback when run as script
 
 
 # Base configuration used for all experiments
-BASE_CONFIG = Path("experiments/mcitrack/mcitrack_b224.yaml")
+BASE_CONFIG = Path("experiments/mcitrack/mcitrack_l384.yaml")
 TRACKER = "mcitrack"
 
 # Where to store auto-generated configs and logs

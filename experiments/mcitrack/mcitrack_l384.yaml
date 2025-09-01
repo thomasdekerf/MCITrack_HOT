@@ -88,7 +88,7 @@ TEST:
     NFS: 0.75
     UAV: 0.88
     VOT20: 0.92
-    HOT: 0.92
+    HOT: 0.95
   INTER:
     LASOT: 25
     LASOT_EXTENSION_SUBSET: 50
@@ -97,7 +97,7 @@ TEST:
     NFS: 25
     UAV: 40
     VOT20: 10
-    HOT: 25
+    HOT: 10
   MB:
     LASOT: 500
     LASOT_EXTENSION_SUBSET: 500
@@ -107,3 +107,11 @@ TEST:
     UAV: 500
     VOT20: 500
     HOT: 500
+#2025-08-31T15:31:48:
+#  832840,upt0:
+#    8_uph0:
+#      95_inter10_mb500,0:
+#        8,0:
+#          95,10,500,0:
+#            7546408176422119,0:
+#              5546308755874634:
