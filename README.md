@@ -101,7 +101,7 @@ lib/test/evaluation/local.py  # paths about testing
 Download [pre-trained weights](https://drive.google.com/drive/folders/1qDAMcU3JpahV7MriEOl4KfjKvAAFXd3E?usp=sharing) and put it under [./pretrained](pretrained)
 ### Train MCITrack
 ```
-torchrun --nproc_per_node 8 lib/train/run_training.py --script mcitrack --config mcitrack_b224 --save_dir .
+python lib/train/run_training.py --script mcitrack --config mcitrack_b224 --save_dir .
 ```
 
 ### Fine-tune or retrain
@@ -127,7 +127,7 @@ To train exclusively on your HOT dataset, first set `hot_dir` in
 HOT-specific config:
 
 ```
-torchrun --nproc_per_node 1 lib/train/run_training.py --script mcitrack --config mcitrack_b224_hot --save_dir .
+python lib/train/run_training.py --script mcitrack --config mcitrack_b224_hot --save_dir .
 ```
 
 This configuration uses only the HOT sequences and a small batch size suitable

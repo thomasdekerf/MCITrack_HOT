@@ -43,7 +43,7 @@ settings.hot_dir = '/path/to/HOT_ROOT'
 Then use the HOT-specific experiment configuration:
 
 ```bash
-torchrun --nproc_per_node 1 lib/train/run_training.py --script mcitrack --config mcitrack_b224_hot --save_dir .
+python lib/train/run_training.py --script mcitrack --config mcitrack_b224_hot --save_dir .
 ```
 
 This trains MCITrack using only the HOT sequences.

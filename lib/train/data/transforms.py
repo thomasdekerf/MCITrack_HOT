@@ -193,9 +193,14 @@ class ToTensor(TransformBase):
         else:
             return image
 
-    def transfrom_mask(self, mask):
+    def transform_mask(self, mask):
+        """Convert mask to a tensor."""
         if isinstance(mask, np.ndarray):
             return torch.from_numpy(mask)
+        elif isinstance(mask, torch.Tensor):
+            return mask
+        else:
+            raise ValueError("dtype must be np.ndarray or torch.Tensor")
 
     def transform_att(self, att):
         if isinstance(att, np.ndarray):
