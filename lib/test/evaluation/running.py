@@ -149,7 +149,8 @@ def run_sequence(seq: Sequence, tracker: Tracker, debug=False, num_gpu=8):
         exec_time = sum(output['time'])
         num_frames = len(output['time'])
 
-    print('FPS: {}'.format(num_frames / exec_time))
+    fps = float('inf') if exec_time == 0 else num_frames / exec_time
+    print('FPS: {}'.format(fps))
 
     if not debug:
         _save_tracker_output(seq, tracker, output)

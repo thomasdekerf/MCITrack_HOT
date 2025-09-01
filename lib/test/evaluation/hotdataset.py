@@ -46,14 +46,23 @@ class HOTDataset(BaseDataset):
         ground_truth_rect = ground_truth_rect.reshape(-1, 4)
 
         # --- optional safety: match #frames with #annotations
-        n = min(len(frames), len(ground_truth_rect))
-        if n == 0:
+        if len(frames) == 0 or len(ground_truth_rect) == 0:
             raise RuntimeError(f"No frames/annotations found in {seq_path}")
+
         if len(frames) != len(ground_truth_rect):
-            print(
-                f"[HOTDataset] Warning: {sequence_name} has {len(frames)} frames but {len(ground_truth_rect)} annos. Truncating to {n}.")
-            frames = frames[:n]
-            ground_truth_rect = ground_truth_rect[:n]
+            if len(ground_truth_rect) == 1 and len(frames) > 1:
+                print(
+                    f"[HOTDataset] Warning: {sequence_name} has {len(frames)} frames but 1 anno. "
+                    "Using the first annotation for initialization and keeping all frames.")
+                # Repeat the first annotation so that Sequence has per-frame boxes
+                first = ground_truth_rect[0]
+                ground_truth_rect = np.vstack([first for _ in range(len(frames))])
+            else:
+                n = min(len(frames), len(ground_truth_rect))
+                print(
+                    f"[HOTDataset] Warning: {sequence_name} has {len(frames)} frames but {len(ground_truth_rect)} annos. Truncating to {n}.")
+                frames = frames[:n]
+                ground_truth_rect = ground_truth_rect[:n]
 
         return Sequence(sequence_name, frames, 'hot', ground_truth_rect)
 

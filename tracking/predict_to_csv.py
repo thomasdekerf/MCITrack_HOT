@@ -96,8 +96,6 @@ def main():
                         help='Path to the single output CSV (default: submission.csv)')
     parser.add_argument('--sequence', type=str, default=None,
                         help='Optional single sequence name to run/aggregate')
-    parser.add_argument('--prefix', type=str, default='vis',
-                        help='ID prefix (e.g., vis -> vis-<sequence>_<idx>)')
     parser.add_argument('--start_index', type=int, default=1,
                         help='Frame index base for IDs (1 for _1, 0 for _0, ...)')
     parser.add_argument('--init_rect_filename', type=str, default='init_rect.txt',
@@ -130,7 +128,7 @@ def main():
     results_root = tracker.results_dir
 
     # Aggregate all predictions into a single CSV
-    # Format: id,x,y,w,h  with id like "<prefix>-<sequence>_<frame_idx>"
+    # Format: id,x,y,w,h  with id like "<sequence>_<frame_idx>"
     rows = []
     for seq in tqdm(dataset, desc="Collecting predictions"):
         base_path = find_pred_base(results_root, seq.name)
@@ -144,7 +142,7 @@ def main():
         # build IDs
         for i in range(n_frames):
             idx = i + args.start_index
-            id_str = f"{args.prefix}-{seq.name}_{idx}"
+            id_str = f"{seq.name}_{idx}"
             x, y, w, h = preds[i].tolist()
             rows.append((id_str, x, y, w, h))
 
