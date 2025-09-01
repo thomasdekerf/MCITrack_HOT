@@ -3,7 +3,7 @@ from torch.utils.data.distributed import DistributedSampler
 import torch.nn as nn
 
 # datasets related
-from lib.train.dataset import Lasot, Got10k, MSCOCOSeq, ImagenetVID, TrackingNet, Imagenet1k, VastTrack
+from lib.train.dataset import Lasot, Got10k, MSCOCOSeq, ImagenetVID, TrackingNet, Imagenet1k, VastTrack, HOT
 from lib.train.dataset import Lasot_lmdb, Got10k_lmdb, MSCOCOSeq_lmdb, ImagenetVID_lmdb, TrackingNet_lmdb
 from lib.train.dataset import VisEvent, LasHeR, DepthTrack
 from lib.train.dataset import Otb99_lang, Tnl2k, RefCOCOSeq
@@ -49,7 +49,7 @@ def names2datasets(name_list: list, settings, image_loader):
         assert name in ["LASOT", "GOT10K_vottrain", "GOT10K_votval", "GOT10K_train_full",
                         "COCO17", "VID", "TRACKINGNET", "IMAGENET1K",
                         "DepthTrack_train", "DepthTrack_val", "LasHeR_all", "LasHeR_train","LasHeR_val", "VisEvent",
-                        "REFCOCOG", "TNL2K_train", "OTB99_train","VASTTRACK"]
+                        "REFCOCOG", "TNL2K_train", "OTB99_train","VASTTRACK", "HOT"]
         if name == "LASOT":
             if settings.use_lmdb:
                 print("Building lasot dataset from lmdb")
@@ -133,6 +133,8 @@ def names2datasets(name_list: list, settings, image_loader):
                                             ))
         if name == "IMAGENET1K":
             datasets.append(Imagenet1k(settings.env.imagenet1k_dir, image_loader=image_loader))
+        if name == "HOT":
+            datasets.append(HOT(settings.env.hot_dir, image_loader=image_loader))
         if name == "DepthTrack_train":
             datasets.append(DepthTrack(settings.env.depthtrack_dir,
                                        dtype='color' if not settings.multi_modal_vision else 'rgbcolormap',
@@ -202,9 +204,14 @@ def build_dataloaders(cfg, settings):
     transform_joint = tfm.Transform(tfm.ToGrayscale(probability=0.05),
                                     tfm.RandomHorizontalFlip(probability=0.5))
 
-    transform_train = tfm.Transform(tfm.ToTensorAndJitter(0.2),
-                                    tfm.RandomHorizontalFlip_Norm(probability=0.5),
-                                    tfm.Normalize(mean=cfg.DATA.MEAN, std=cfg.DATA.STD))
+    transform_train = tfm.Transform(
+        tfm.ToTensorAndJitter(0.2),
+        tfm.RandomOcclusion(probability=0.2),
+        tfm.RandomBlur(probability=0.1),
+        tfm.RandomDownsample(probability=0.1, min_scale=0.5, max_scale=1.0),
+        tfm.RandomHorizontalFlip_Norm(probability=0.5),
+        tfm.Normalize(mean=cfg.DATA.MEAN, std=cfg.DATA.STD)
+    )
 
     # The tracking pairs processing module
     output_sz = settings.output_sz
