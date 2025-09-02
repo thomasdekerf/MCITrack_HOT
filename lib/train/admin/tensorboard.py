@@ -25,3 +25,5 @@ class TensorboardWriter:
             for var_name, val in loader_stats.items():
                 if hasattr(val, 'history') and getattr(val, 'has_new_data', True):
                     self.writer[loader_name].add_scalar(var_name, val.history[ind], epoch)
+            # Flush to ensure TensorBoard reads the latest values
+            self.writer[loader_name].flush()
