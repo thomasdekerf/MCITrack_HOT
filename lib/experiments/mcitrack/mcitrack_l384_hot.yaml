@@ -8,7 +8,7 @@ DATA:
     CENTER_JITTER: 3.5
     FACTOR: 4.0
     SCALE_JITTER: 0.5
-    SIZE: 320
+    SIZE: 384
     NUMBER: 2
   STD:
   - 0.229
@@ -18,36 +18,41 @@ DATA:
     CENTER_JITTER: 0
     FACTOR: 2.0
     SCALE_JITTER: 0
-    SIZE: 112
-    NUMBER: 10
+    SIZE: 192
+    NUMBER: 5
   TRAIN:
     DATASETS_NAME:
-    - HOT
+    - LASOT
+    - GOT10K_vottrain
+    - COCO17
+    - TRACKINGNET
+    - VASTTRACK
     DATASETS_RATIO:
+    - 1
+    - 1
+    - 1
+    - 1
     - 1
     SAMPLE_PER_EPOCH: 6000
 MODEL:
   ENCODER:
-    TYPE: fastitpnb
+    TYPE: fastitpnl
     STRIDE: 16
-#    PRETRAIN_TYPE: '/pretrained/fast_itpn_base_clipl_e1600.pt'
-    PRETRAIN_TYPE: 'fast_itpn_large_1600e_1k.pt'
+    PRETRAIN_TYPE: '/pretrained/fast_itpn_large_1600e_1k.pt'
     DROP_PATH: 0.1
     POS_TYPE: index # index or interpolate
     TOKEN_TYPE_INDICATE: True
-    INTERACTION_INDEXES: [[8, 14], [14, 20], [20, 26],[26,32]]
+    INTERACTION_INDEXES: [[6, 16], [16, 26], [26, 36],[36,46]]
     GRAD_CKPT: True
   NECK:
-    D_MODEL: 512
+    D_MODEL: 768
   DECODER:
     TYPE: CENTER
     NUM_CHANNELS: 256
 TRAIN:
-#  PRETRAINED_PATH: C:\Users\AI2\PycharmProjects\Virtual_Staining\MCITrack_HOT\checkpoints\train\mcitrack\mcitrack_b224\MCITRACK_ep0300.pth.tar
-  PRETRAINED_PATH: C:\Users\AI2\PycharmProjects\Virtual_Staining\MCITrack_HOT\checkpoints\train\mcitrack\mcitrack_l384\MCITRACK_ep0300.pth.tar
   ENCODER_MULTIPLIER: 0.1
-  BATCH_SIZE: 8
-  EPOCH: 300
+  BATCH_SIZE: 6
+  EPOCH: 3
   GRAD_CLIP_NORM: 0.1
   LR: 0.0004
   LR_DROP_EPOCH: 240
@@ -61,16 +66,16 @@ TRAIN:
 TEST:
   EPOCH: 3
   SEARCH_FACTOR: 4.0
-  SEARCH_SIZE: 224
+  SEARCH_SIZE: 384
   TEMPLATE_FACTOR: 2.0
-  TEMPLATE_SIZE: 112
+  TEMPLATE_SIZE: 192
   WINDOW: True
   NUM_TEMPLATES: 5
   UPT:
     HOT: 0.8
   UPH:
-    HOT: 0.92
+    HOT: 0.95
   INTER:
-    HOT: 25
+    HOT: 10
   MB:
     HOT: 500

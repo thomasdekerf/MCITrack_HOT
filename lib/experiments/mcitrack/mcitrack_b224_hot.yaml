@@ -30,8 +30,7 @@ MODEL:
   ENCODER:
     TYPE: fastitpnb
     STRIDE: 16
-#    PRETRAIN_TYPE: '/pretrained/fast_itpn_base_clipl_e1600.pt'
-    PRETRAIN_TYPE: 'fast_itpn_large_1600e_1k.pt'
+    PRETRAIN_TYPE: '/pretrained/fast_itpn_base_clipl_e1600.pt'
     DROP_PATH: 0.1
     POS_TYPE: index # index or interpolate
     TOKEN_TYPE_INDICATE: True
@@ -43,8 +42,7 @@ MODEL:
     TYPE: CENTER
     NUM_CHANNELS: 256
 TRAIN:
-#  PRETRAINED_PATH: C:\Users\AI2\PycharmProjects\Virtual_Staining\MCITrack_HOT\checkpoints\train\mcitrack\mcitrack_b224\MCITRACK_ep0300.pth.tar
-  PRETRAINED_PATH: C:\Users\AI2\PycharmProjects\Virtual_Staining\MCITrack_HOT\checkpoints\train\mcitrack\mcitrack_l384\MCITRACK_ep0300.pth.tar
+  PRETRAINED_PATH: 'C:\Users\AI2\PycharmProjects\Virtual_Staining\MCITrack_HOT\checkpoints\train\mcitrack\mcitrack_b224\MCITRACK_ep0300.pth.tar'
   ENCODER_MULTIPLIER: 0.1
   BATCH_SIZE: 8
   EPOCH: 300
@@ -59,7 +57,7 @@ TRAIN:
     DECAY_RATE: 0.1
   WEIGHT_DECAY: 0.0001
 TEST:
-  EPOCH: 3
+  EPOCH: 300
   SEARCH_FACTOR: 4.0
   SEARCH_SIZE: 224
   TEMPLATE_FACTOR: 2.0

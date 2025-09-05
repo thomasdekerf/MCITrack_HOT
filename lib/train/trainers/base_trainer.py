@@ -90,7 +90,7 @@ class BaseTrainer:
                         else:
                             self.lr_scheduler.step(epoch - 1)
                     # only save the last 10 checkpoints
-                    save_every_epoch = getattr(self.settings, "save_every_epoch", False)
+                    save_every_epoch = getattr(self.settings, "save_every_epoch", True)
                     # save every 10 epochs
                     # save_every_epoch = True
                     if epoch > (max_epochs - 5) or save_every_epoch or epoch % 50 == 0:
@@ -191,6 +191,7 @@ class BaseTrainer:
             raise TypeError
 
         # Load network
+        print(checkpoint_path)
         checkpoint_dict = torch.load(checkpoint_path, map_location='cpu')
 
         assert net_type == checkpoint_dict['net_type'], 'Network is not of correct type.'

@@ -1,0 +1,74 @@
+DATA:
+  MAX_SAMPLE_INTERVAL: 400
+  MEAN:
+  - 0.485
+  - 0.456
+  - 0.406
+  SEARCH:
+    CENTER_JITTER: 3.5
+    FACTOR: 5.0
+    SCALE_JITTER: 0.75
+    SIZE: 384
+    NUMBER: 2
+  STD:
+  - 0.229
+  - 0.224
+  - 0.225
+  TEMPLATE:
+    CENTER_JITTER: 0.2
+    FACTOR: 2.2
+    SCALE_JITTER: 0.2
+    SIZE: 192
+    NUMBER: 8
+  TRAIN:
+    DATASETS_NAME:
+    - HOT
+    DATASETS_RATIO:
+    - 1
+    SAMPLE_PER_EPOCH: 60
+MODEL:
+  ENCODER:
+    TYPE: fastitpnl
+    STRIDE: 16
+    PRETRAIN_TYPE: '\pretrained\fast_itpn_large_1600e_1k.pt'
+    DROP_PATH: 0.1
+    POS_TYPE: index # index or interpolate
+    TOKEN_TYPE_INDICATE: True
+    INTERACTION_INDEXES: [[6, 16], [16, 26], [26, 36],[36,46]]
+    GRAD_CKPT: True
+  NECK:
+    D_MODEL: 768
+  DECODER:
+    TYPE: CENTER
+    NUM_CHANNELS: 256
+TRAIN:
+  PRETRAINED_PATH: 'C:\Users\AI2\PycharmProjects\Virtual_Staining\MCITrack_HOT\checkpoints\train\mcitrack\mcitrack_l384\MCITRACK_ep0300.pth.tar'
+  ENCODER_MULTIPLIER: 0.1
+  BATCH_SIZE: 6
+  EPOCH: 100
+  GRAD_CLIP_NORM: 0.1
+  LR: 0.0004
+  LR_DROP_EPOCH: 60
+  NUM_WORKER: 10
+  OPTIMIZER: ADAMW
+  PRINT_INTERVAL: 10
+  SCHEDULER:
+    TYPE: step
+    DECAY_RATE: 0.1
+  WEIGHT_DECAY: 0.0001
+TEST:
+  EPOCH: 100
+  SEARCH_FACTOR: 5.0
+  SEARCH_SIZE: 384
+  TEMPLATE_FACTOR: 2.2
+  TEMPLATE_SIZE: 192
+  WINDOW: True
+  NUM_TEMPLATES: 5
+  UPT:
+    HOT: 0.8
+  UPH:
+    HOT: 0.95
+  INTER:
+    HOT: 10
+  MB:
+    HOT: 500

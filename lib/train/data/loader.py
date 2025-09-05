@@ -82,6 +82,8 @@ def ltr_collate_stack1(batch):
             # shared memory tensor to avoid an extra copy
             numel = sum([x.numel() for x in batch])
             storage = batch[0].storage()._new_shared(numel)
+            # storage = batch[0].untyped_storage()._new_shared(numel)
+
             out = batch[0].new(storage)
             # len(batch)
             # 16

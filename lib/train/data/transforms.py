@@ -459,11 +459,11 @@ class RandomDownsample(TransformBase):
         tensor = F.interpolate(tensor, size=(h, w), mode=mode, align_corners=False)
         return tensor.squeeze(0)
 
-    def transform_image(self, image, scale):
-        return self._resize(image, scale, "bilinear")
-
-    def transform_mask(self, mask, scale):
-        return self._resize(mask, scale, "nearest")
-
-    def transform_att(self, att, scale):
-        return self._resize(att, scale, "nearest")
+    # def transform_image(self, image, scale):
+    #     return self._resize(image, scale, "bilinear")
+    #
+    # def transform_mask(self, mask, scale):
+    #     return self._resize(mask, scale, "nearest")
+    #
+    # def transform_att(self, att, scale):
+    #     return self._resize(att, scale, "nearest")

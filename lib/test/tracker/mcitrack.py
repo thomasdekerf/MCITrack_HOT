@@ -16,7 +16,7 @@ class MCITRACK(BaseTracker):
     def __init__(self, params, dataset_name):
         super(MCITRACK, self).__init__(params)
         network = build_mcitrack(params.cfg)
-        checkpoint = torch.load(self.params.checkpoint, map_location="cpu")['net']
+        checkpoint = torch.load(self.params.checkpoint, map_location="cpu", weights_only=False)['net']
         model_state = network.state_dict()
         pos_key = next((k for k in model_state.keys() if 'pos_embed' in k), None)
         if pos_key and pos_key in checkpoint and checkpoint[pos_key].shape == model_state[pos_key].shape:
