@@ -150,6 +150,10 @@ class LTRTrainer(BaseTrainer):
                 with open(self.settings.log_file, 'a') as f:
                     f.write(log_str)
 
+            if self.settings.local_rank in [-1, 0]:
+                global_step = (self.epoch - 1) * loader.__len__() + i
+                self.tensorboard_writer.write_interval(loader.name, self.stats, global_step)
+
     def _stats_new_epoch(self):
         # Record learning rate
         for loader in self.loaders:

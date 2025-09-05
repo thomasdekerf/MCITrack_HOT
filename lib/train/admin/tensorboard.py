@@ -27,3 +27,22 @@ class TensorboardWriter:
                     self.writer[loader_name].add_scalar(var_name, val.history[ind], epoch)
             # Flush to ensure TensorBoard reads the latest values
             self.writer[loader_name].flush()
+
+    def write_interval(self, loader_name: str, stats: OrderedDict, step: int):
+        """Write current average stats to TensorBoard at a given step.
+
+        Args:
+            loader_name: Name of the dataloader whose stats should be written.
+            stats: OrderedDict mapping loader names to their statistics.
+            step: Global step (e.g. iteration number) for TensorBoard.
+        """
+        loader_stats = stats.get(loader_name, None)
+        if loader_stats is None:
+            return
+
+        for var_name, val in loader_stats.items():
+            if hasattr(val, 'avg'):
+                self.writer[loader_name].add_scalar(var_name, val.avg, step)
+
+        # Flush to ensure TensorBoard reads the latest values
+        self.writer[loader_name].flush()
